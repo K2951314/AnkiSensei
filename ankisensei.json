@@ -1,0 +1,48 @@
+{
+  "paths": {
+    "source": "",
+    "apkg_output": "",
+    "audio_dir": ""
+  },
+  "export": {
+    "deck_name": "AnkiSensei"
+  },
+  "tts": {
+    "voice": "ja-JP-NanamiNeural",
+    "concurrency": 5
+  },
+  "layout": {
+    "front_sections": [
+      "sentence",
+      "notes",
+      "audio"
+    ],
+    "front_answer_sections": [
+      "translation"
+    ],
+    "reverse_front_sections": [
+      "translation"
+    ],
+    "reverse_back_sections": [
+      "sentence",
+      "notes",
+      "audio"
+    ],
+    "font_family": "\"Noto Sans JP\", \"Microsoft YaHei\", sans-serif",
+    "base_font_size": 24,
+    "sentence_font_size": 30,
+    "notes_font_size": 22,
+    "answer_font_size": 30,
+    "card_text_color": "#1f2933",
+    "card_background_color": "#ffffff",
+    "notes_color": "#3b4b5a",
+    "sentence_line_height": 1.45,
+    "notes_line_height": 1.8,
+    "answer_line_height": 1.6,
+    "page_padding_top": 20,
+    "page_padding_side": 16,
+    "page_padding_bottom": 28,
+    "sentence_margin_top": 12,
+    "audio_padding_top": 18
+  }
+}
