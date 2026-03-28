@@ -107,7 +107,7 @@ def module_to_tag(module: str) -> str:
 
 def _parse_data_line(line: str, line_no: int, current_module: str) -> SentenceRecord:
     parts = [part.strip() for part in line.split("\t")]
-    if len(parts) in (4, 5):
+    if len(parts) == 4:
         return _parse_tsv_record(parts, line_no, current_module)
 
     repaired_parts = _repair_tsv_parts(parts)
@@ -117,7 +117,7 @@ def _parse_data_line(line: str, line_no: int, current_module: str) -> SentenceRe
     if len(parts) > 1:
         raise ValueError(
             f"Line {line_no} has {len(parts)} tab-separated columns. "
-            "Expected JP<TAB>NOTES<TAB>AUDIO<TAB>ZH[<TAB>TTS_TEXT]."
+            "Expected JP<TAB>NOTES<TAB>AUDIO<TAB>ZH."
         )
 
     return _parse_legacy_record(line, line_no, current_module)
@@ -128,8 +128,7 @@ def _parse_tsv_record(
     line_no: int,
     current_module: str,
 ) -> SentenceRecord:
-    jp_sentence, note_list, audio_raw, zh = parts[:4]
-    tts_text_override = parts[4] if len(parts) == 5 else None
+    jp_sentence, note_list, audio_raw, zh = parts
     audio_filename = _normalize_audio_filename(audio_raw, line_no)
 
     if not jp_sentence:
@@ -142,11 +141,9 @@ def _parse_tsv_record(
         module=current_module,
         jp_furigana=jp_sentence,
         jp_plain=jp_sentence,
-        notes_raw=note_list,
         furigana_list_html=_build_note_list_html(note_list),
         zh=zh,
         audio_filename=audio_filename,
-        tts_text_override=tts_text_override or None,
     )
 
 
@@ -155,8 +152,7 @@ def _parse_legacy_record(line: str, line_no: int, current_module: str) -> Senten
     if match is None:
         raise ValueError(
             f"Line {line_no} has invalid format. Expected either: "
-            "JP<TAB>NOTES<TAB>AUDIO<TAB>ZH[<TAB>TTS_TEXT] or "
-            "JP_FURIGANA[sound:FILE.mp3] ZH_MEANING"
+            "JP<TAB>NOTES<TAB>AUDIO<TAB>ZH or JP_FURIGANA[sound:FILE.mp3] ZH_MEANING"
         )
 
     jp_furigana = match.group("jp").strip()
@@ -179,7 +175,6 @@ def _parse_legacy_record(line: str, line_no: int, current_module: str) -> Senten
         module=current_module,
         jp_furigana=jp_furigana,
         jp_plain=jp_plain,
-        notes_raw=jp_furigana,
         furigana_list_html=build_furigana_list_html(jp_furigana),
         zh=zh,
         audio_filename=audio_filename,

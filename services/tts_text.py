@@ -14,10 +14,6 @@ SINGLE_UNIT_PATTERN = re.compile(
     re.IGNORECASE,
 )
 NUMBER_PATTERN = re.compile(r"\d+(?:\.\d+)?")
-ANNOTATED_TERM_PATTERN = re.compile(
-    r"(?P<term_fw>[^\s\uFF08\uFF09\(\)\|;\uFF1B]+)\uFF08(?P<reading_fw>[^\uFF09]+)\uFF09"
-    r"|(?P<term_hw>[^\s\uFF08\uFF09\(\)\|;\uFF1B]+)\((?P<reading_hw>[^)]+)\)"
-)
 
 FULLWIDTH_TRANSLATION = str.maketrans(
     {
@@ -120,20 +116,6 @@ def normalize_tts_text(text: str) -> str:
     return normalized
 
 
-def apply_notes_reading_overrides(sentence: str, notes: str) -> str:
-    if not sentence or not notes:
-        return sentence
-
-    replaced = sentence
-    for term, reading in _collect_note_entries(notes):
-        if not term or not reading:
-            continue
-        # 仅在句中恰好出现一次时替换，避免误替换。
-        if replaced.count(term) == 1:
-            replaced = replaced.replace(term, reading)
-    return replaced
-
-
 def _replace_compound_unit(match: re.Match[str]) -> str:
     number_text = match.group("num")
     unit = match.group("unit").lower()
@@ -216,15 +198,3 @@ def _read_digits(number_text: str) -> str:
 
 def _wrap_reading(reading: str) -> str:
     return f" {reading} "
-
-
-def _collect_note_entries(notes: str) -> list[tuple[str, str]]:
-    entries: list[tuple[str, str]] = []
-    for match in ANNOTATED_TERM_PATTERN.finditer(notes):
-        term = (match.group("term_fw") or match.group("term_hw") or "").strip()
-        reading = (match.group("reading_fw") or match.group("reading_hw") or "").strip()
-        if term and reading:
-            entries.append((term, reading))
-    # 长词优先替换，减少短词先替导致的歧义。
-    entries.sort(key=lambda item: len(item[0]), reverse=True)
-    return entries

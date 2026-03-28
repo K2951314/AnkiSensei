@@ -18,7 +18,7 @@ from services.audio_cache import (
 from services.models import ExportStats, SentenceRecord
 from services.source_parser import module_to_tag, parse_sentence_source
 from services.tts_service import generate_audio
-from services.tts_text import apply_notes_reading_overrides, normalize_tts_text
+from services.tts_text import normalize_tts_text
 
 
 @dataclass(frozen=True)
@@ -100,18 +100,15 @@ def build_audio_jobs(
     force_audio: bool,
 ) -> tuple[list[AudioJob], int]:
     manifest_entries = load_audio_manifest(audio_dir)
-    filename_to_record: dict[str, SentenceRecord] = {}
+    filename_to_text: dict[str, str] = {}
     for record in records:
-        filename_to_record.setdefault(record.audio_filename, record)
+        filename_to_text.setdefault(record.audio_filename, record.jp_plain)
 
     jobs: list[AudioJob] = []
     skipped = 0
 
-    for audio_filename, record in sorted(filename_to_record.items()):
-        base = record.tts_text_override or record.jp_plain
-        if not record.tts_text_override:
-            base = apply_notes_reading_overrides(base, record.notes_raw)
-        normalized_text = normalize_tts_text(base)
+    for audio_filename, plain_text in sorted(filename_to_text.items()):
+        normalized_text = normalize_tts_text(plain_text)
         fingerprint = build_audio_fingerprint_from_normalized(normalized_text, voice)
         if not force_audio and is_audio_current(
             audio_dir,

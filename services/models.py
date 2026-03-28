@@ -10,11 +10,9 @@ class SentenceRecord:
     module: str
     jp_furigana: str
     jp_plain: str
-    notes_raw: str
     furigana_list_html: str
     zh: str
     audio_filename: str
-    tts_text_override: str | None = None
 
 
 @dataclass(frozen=True)
